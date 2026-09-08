@@ -81,7 +81,33 @@ next one.
 - Higher orders increasingly just reproduce chunks of the training data
   verbatim.
 
+## Character-level vs. syllable-level
+
+`Model` predicts one character at a time. `SyllableModel` has the same
+`Train`/`Generate` shape but predicts one syllable at a time, using a
+lightweight heuristic (`splitSyllables`) to break each training name into
+syllable-sized chunks before folding them into the transition table:
+
+```go
+model, err := namegen.NewSyllableModel(1) // order-1: predict from 1 preceding syllable
+if err != nil {
+	panic(err)
+}
+if err := model.Train(corpus); err != nil {
+	panic(err)
+}
+
+name, err := model.Generate(rnd)
+```
+
+Because its tokens are syllables rather than characters, `SyllableModel`
+tends to produce output that reads as more pronounceable and less like
+random letter noise, at the cost of needing a somewhat larger corpus:
+`observe` only learns from a name if it splits into at least `order`
+syllables, so very short names contribute nothing at order 2 or above.
+
 ## Status
 
-Early skeleton. The chain is character-level only; see the roadmap for
-planned additions like syllable-level models and length/prefix constraints.
+The chain has both a character-level (`Model`) and syllable-level
+(`SyllableModel`) implementation. See the roadmap for planned additions like
+length/prefix constraints and model serialization.

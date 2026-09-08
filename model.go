@@ -1,6 +1,7 @@
-// Package namegen generates random names by training a character-level
-// Markov chain on a corpus of example names and sampling new strings from
-// the learned transition table.
+// Package namegen generates random names by training a Markov chain on a
+// corpus of example names and sampling new strings from the learned
+// transition table. Model works character by character; SyllableModel works
+// syllable by syllable.
 package namegen
 
 import (
@@ -14,6 +15,10 @@ import (
 // appear in real input because Train works on text lines with the byte 0
 // stripped by bufio.Scanner's line splitting.
 const endSymbol = 0
+
+// errOrderTooSmall is returned by NewModel and NewSyllableModel for a
+// non-positive order; shared so both constructors report it identically.
+var errOrderTooSmall = errors.New("namegen: order must be at least 1")
 
 // Model holds the learned transition counts for an order-N Markov chain.
 // The zero value is not usable; construct one with NewModel.
@@ -30,7 +35,7 @@ type Model struct {
 // higher orders tend to just reproduce the training data.
 func NewModel(order int) (*Model, error) {
 	if order < 1 {
-		return nil, errors.New("namegen: order must be at least 1")
+		return nil, errOrderTooSmall
 	}
 	return &Model{
 		order:       order,
