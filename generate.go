@@ -43,6 +43,16 @@ func (m *Model) Generate(rnd *rand.Rand) (string, error) {
 	return capitalize(sb.String()), nil
 }
 
+// GenerateConstrained is like Generate but only returns a name matching c.
+// It draws ordinary candidates from Generate and discards the ones that
+// don't fit, since the transition table has no way to steer a walk toward a
+// target length, prefix, or suffix. If the model's vocabulary can't produce
+// a match within a reasonable number of tries, it returns
+// ErrConstraintsNotSatisfiable.
+func (m *Model) GenerateConstrained(rnd *rand.Rand, c Constraints) (string, error) {
+	return generateConstrained(c, func() (string, error) { return m.Generate(rnd) })
+}
+
 func (m *Model) pickStart(rnd *rand.Rand) string {
 	target := rnd.Intn(m.startTotal)
 	for ctx, count := range m.starts {

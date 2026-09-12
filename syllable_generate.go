@@ -37,6 +37,13 @@ func (m *SyllableModel) Generate(rnd *rand.Rand) (string, error) {
 	return capitalize(strings.Join(syllables, "")), nil
 }
 
+// GenerateConstrained is like Generate but only returns a name matching c.
+// See Model.GenerateConstrained for how the rejection sampling works and
+// when it gives up.
+func (m *SyllableModel) GenerateConstrained(rnd *rand.Rand, c Constraints) (string, error) {
+	return generateConstrained(c, func() (string, error) { return m.Generate(rnd) })
+}
+
 func (m *SyllableModel) pickStart(rnd *rand.Rand) string {
 	target := rnd.Intn(m.startTotal)
 	for ctx, count := range m.starts {

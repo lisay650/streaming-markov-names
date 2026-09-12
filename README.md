@@ -106,8 +106,28 @@ random letter noise, at the cost of needing a somewhat larger corpus:
 `observe` only learns from a name if it splits into at least `order`
 syllables, so very short names contribute nothing at order 2 or above.
 
+## Constraints
+
+`GenerateConstrained` wraps `Generate` with a length/prefix/suffix filter.
+Both `Model` and `SyllableModel` support it:
+
+```go
+name, err := model.GenerateConstrained(rnd, namegen.Constraints{
+	Prefix:    "el",
+	MinLength: 4,
+	MaxLength: 8,
+})
+```
+
+It works by rejection sampling: drawing ordinary candidates from `Generate`
+and discarding the ones that don't fit, since the transition table has no
+way to steer a walk toward a target directly. If the model's vocabulary
+can't produce a match after a few hundred tries, it returns
+`ErrConstraintsNotSatisfiable` - a corpus with no name starting "zq", for
+instance, will never produce one no matter how it's retried.
+
 ## Status
 
 The chain has both a character-level (`Model`) and syllable-level
-(`SyllableModel`) implementation. See the roadmap for planned additions like
-length/prefix constraints and model serialization.
+(`SyllableModel`) implementation, plus length/prefix/suffix constraints on
+generation. See the roadmap for planned additions like model serialization.
