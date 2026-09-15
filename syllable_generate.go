@@ -44,6 +44,15 @@ func (m *SyllableModel) GenerateConstrained(rnd *rand.Rand, c Constraints) (stri
 	return generateConstrained(c, func() (string, error) { return m.Generate(rnd) })
 }
 
+// GenerateN produces n random names, none of which repeat another. See
+// Model.GenerateN for how duplicate avoidance works and when it gives up.
+func (m *SyllableModel) GenerateN(rnd *rand.Rand, n int) ([]string, error) {
+	if !m.Trained() {
+		return nil, ErrUntrained
+	}
+	return generateN(n, func() (string, error) { return m.Generate(rnd) })
+}
+
 func (m *SyllableModel) pickStart(rnd *rand.Rand) string {
 	target := rnd.Intn(m.startTotal)
 	for ctx, count := range m.starts {

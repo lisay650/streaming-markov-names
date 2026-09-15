@@ -126,8 +126,26 @@ can't produce a match after a few hundred tries, it returns
 `ErrConstraintsNotSatisfiable` - a corpus with no name starting "zq", for
 instance, will never produce one no matter how it's retried.
 
+## Generating several names at once
+
+`GenerateN` draws names one at a time from `Generate` and discards any repeat
+of a name already returned, so the result has no duplicates:
+
+```go
+names, err := model.GenerateN(rnd, 10)
+if err != nil {
+	panic(err)
+}
+```
+
+Like `GenerateConstrained`, it's rejection sampling under the hood, so it can
+come up short: a model whose vocabulary can only ever produce a handful of
+distinct names will return `ErrTooFewUniqueNames` if asked for more than
+that. Both `Model` and `SyllableModel` support it.
+
 ## Status
 
 The chain has both a character-level (`Model`) and syllable-level
-(`SyllableModel`) implementation, plus length/prefix/suffix constraints on
-generation. See the roadmap for planned additions like model serialization.
+(`SyllableModel`) implementation, length/prefix/suffix constraints on
+generation, and a `GenerateN` helper for drawing a batch of distinct names.
+See the roadmap for planned additions like model serialization.

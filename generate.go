@@ -53,6 +53,17 @@ func (m *Model) GenerateConstrained(rnd *rand.Rand, c Constraints) (string, erro
 	return generateConstrained(c, func() (string, error) { return m.Generate(rnd) })
 }
 
+// GenerateN produces n random names, none of which repeat another. It draws
+// candidates from Generate and discards ones already returned, so it can
+// come up short: if the model's vocabulary can't produce n distinct names
+// within a reasonable number of tries, it returns ErrTooFewUniqueNames.
+func (m *Model) GenerateN(rnd *rand.Rand, n int) ([]string, error) {
+	if !m.Trained() {
+		return nil, ErrUntrained
+	}
+	return generateN(n, func() (string, error) { return m.Generate(rnd) })
+}
+
 func (m *Model) pickStart(rnd *rand.Rand) string {
 	target := rnd.Intn(m.startTotal)
 	for ctx, count := range m.starts {
